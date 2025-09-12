@@ -3,11 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageSquare, Users, Calendar } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface ProjectCardProps {
+  id?: string;
   title: string;
   description: string;
   author: {
+    id?: string;
     name: string;
     major: string;
     avatar?: string;
@@ -17,9 +23,12 @@ interface ProjectCardProps {
   timePosted: string;
   interested: number;
   messages: number;
+  isInterested?: boolean;
+  onInterestToggle?: () => void;
 }
 
 const ProjectCard = ({ 
+  id,
   title, 
   description, 
   author, 
@@ -27,8 +36,74 @@ const ProjectCard = ({
   lookingFor, 
   timePosted, 
   interested, 
-  messages 
+  messages,
+  isInterested = false,
+  onInterestToggle
 }: ProjectCardProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [isInterestedState, setIsInterestedState] = useState(isInterested);
+
+  const handleJoinProject = async () => {
+    if (!user || !id) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to join projects",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (author.id === user.id) {
+      toast({
+        title: "Cannot join your own project",
+        description: "You cannot join a project you created",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (isInterestedState) {
+        // Remove interest
+        const { error } = await supabase
+          .from('project_interests')
+          .delete()
+          .eq('project_id', id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+        setIsInterestedState(false);
+        toast({ title: "Removed from interested list" });
+      } else {
+        // Add interest
+        const { error } = await supabase
+          .from('project_interests')
+          .insert([
+            {
+              project_id: id,
+              user_id: user.id,
+            },
+          ]);
+
+        if (error) throw error;
+        setIsInterestedState(true);
+        toast({ title: "Added to interested list!" });
+      }
+      
+      onInterestToggle?.();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Card className="bg-gradient-card border-border shadow-card hover:shadow-hover transition-all duration-300 hover:scale-[1.02]">
       <CardHeader className="pb-3">
@@ -103,8 +178,14 @@ const ProjectCard = ({
               <span>{messages} messages</span>
             </div>
           </div>
-          <Button size="sm" className="bg-gradient-primary text-white hover:shadow-primary">
-            Join Project
+          <Button 
+            size="sm" 
+            className="bg-gradient-primary text-white hover:shadow-primary"
+            onClick={handleJoinProject}
+            disabled={loading}
+            variant={isInterestedState ? "outline" : "default"}
+          >
+            {loading ? "..." : isInterestedState ? "Interested ✓" : "Join Project"}
           </Button>
         </div>
       </CardFooter>
@@ -112,4 +193,4 @@ const ProjectCard = ({
   );
 };
 
-export default ProjectCard;
+export { ProjectCard };

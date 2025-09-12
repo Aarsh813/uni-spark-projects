@@ -1,5 +1,5 @@
-import Navigation from "@/components/Navigation";
-import ProjectCard from "@/components/ProjectCard";
+import { Navigation } from "@/components/Navigation";
+import { ProjectCard } from "@/components/ProjectCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";

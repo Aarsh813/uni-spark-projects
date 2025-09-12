@@ -1,16 +1,33 @@
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "./AuthModal";
+import { CreateProjectModal } from "./CreateProjectModal";
+import { useState } from "react";
 import { 
   Users, 
   FolderPlus, 
   Search, 
   User, 
   Home,
-  MessageSquare
+  MessageSquare,
+  Plus,
+  LogOut
 } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
+  const { user, profile, signOut } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [createProjectModalOpen, setCreateProjectModalOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
   
   return (
     <nav className="bg-background border-b border-border shadow-sm">
@@ -44,7 +61,11 @@ const Navigation = () => {
                 <span>Discover</span>
               </Button>
             </Link>
-            <Button variant="ghost" className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              className="flex items-center space-x-2"
+              onClick={() => setCreateProjectModalOpen(true)}
+            >
               <FolderPlus className="w-4 h-4" />
               <span>Post Project</span>
             </Button>
@@ -56,18 +77,52 @@ const Navigation = () => {
 
           {/* User Actions */}
           <div className="flex items-center space-x-3">
-            <Button variant="outline">Sign In</Button>
-            <Button className="bg-gradient-primary text-white hover:shadow-primary">
-              Sign Up
-            </Button>
+            {user ? (
+              <>
+                <span className="text-sm text-muted-foreground hidden sm:block">
+                  {profile?.full_name || user.email}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setAuthModalOpen(true)}>
+                  Sign In
+                </Button>
+                <Button 
+                  className="bg-gradient-primary text-white hover:shadow-primary"
+                  onClick={() => setAuthModalOpen(true)}
+                >
+                  Sign Up
+                </Button>
+              </>
+            )}
             <Button variant="ghost" size="sm" className="rounded-full">
               <User className="w-5 h-5" />
             </Button>
           </div>
         </div>
       </div>
+
+      <AuthModal
+        open={authModalOpen}
+        onOpenChange={setAuthModalOpen}
+      />
+
+      <CreateProjectModal
+        open={createProjectModalOpen}
+        onOpenChange={setCreateProjectModalOpen}
+      />
     </nav>
   );
 };
 
-export default Navigation;
+export { Navigation };
