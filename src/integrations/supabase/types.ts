@@ -111,10 +111,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_authors: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          major: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          major?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          major?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      get_author_info: {
+        Args: { author_id: string }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          id: string
+          major: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
