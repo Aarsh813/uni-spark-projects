@@ -69,10 +69,15 @@ const Navigation = () => {
               <FolderPlus className="w-4 h-4" />
               <span>Post Project</span>
             </Button>
-            <Button variant="ghost" className="flex items-center space-x-2">
-              <MessageSquare className="w-4 h-4" />
-              <span>Messages</span>
-            </Button>
+            <Link to="/messages">
+              <Button 
+                variant="ghost" 
+                className="flex items-center space-x-2"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Messages</span>
+              </Button>
+            </Link>
           </div>
 
           {/* User Actions */}

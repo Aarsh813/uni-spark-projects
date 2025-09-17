@@ -46,10 +46,19 @@ const ProjectCard = ({
   const [isInterestedState, setIsInterestedState] = useState(isInterested);
 
   const handleJoinProject = async () => {
-    if (!user || !id) {
+    if (!user) {
       toast({
         title: "Sign in required",
         description: "Please sign in to join projects",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!id) {
+      toast({
+        title: "Unavailable",
+        description: "This project cannot be joined right now.",
         variant: "destructive"
       });
       return;
